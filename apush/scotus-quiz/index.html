@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Supreme Court Cases Quiz</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 800px;
+        margin: 20px auto;
+        padding: 20px;
+        line-height: 1.6;
+      }
+      #question-container,
+      #answer-container {
+        margin-bottom: 20px;
+      }
+      .timer {
+        float: right;
+        font-size: 0.9em;
+        color: #666;
+      }
+      #input-container {
+        margin: 20px 0;
+      }
+      input[type="text"] {
+        padding: 8px;
+        width: 300px;
+        margin-right: 10px;
+      }
+      button {
+        padding: 8px 16px;
+        margin-right: 10px;
+        cursor: pointer;
+      }
+      .correct {
+        color: green;
+        font-weight: bold;
+      }
+      .incorrect {
+        color: red;
+        font-weight: bold;
+      }
+      #attempts {
+        margin-top: 10px;
+        font-style: italic;
+      }
+      #full-description {
+        margin-top: 20px;
+        padding: 10px;
+        background-color: #f5f5f5;
+        border-radius: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="question-container"></div>
+    <div id="input-container">
+      <input
+        type="text"
+        id="answer-input"
+        placeholder="Example: Marbury v. Madison 1803"
+      />
+      <button onclick="checkAnswer()">Submit</button>
+      <button onclick="skipQuestion()">Skip</button>
+    </div>
+    <div id="attempts"></div>
+    <div id="answer-container"></div>
+    <div id="full-description"></div>
+
+    <script>
+      const cases = [
+        {
+          description:
+            "This landmark case established the principle of judicial review, giving the Supreme Court the power to declare laws unconstitutional.",
+          answer: "Marbury v. Madison 1803",
+          fullDescription:
+            "This landmark case established the principle of judicial review, giving the Supreme Court the power to declare laws unconstitutional. The Court ruled that Congress cannot pass legislation that conflicts with the Constitution, solidifying the judiciary's role as a coequal branch of government.",
+        },
+        {
+          description:
+            "Which case upheld the constitutionality of the Second Bank of the United States and ruled that states cannot tax federal institutions?",
+          answer: "McCulloch v. Maryland 1819",
+          fullDescription:
+            "The Court upheld the constitutionality of the Second Bank of the United States and ruled that states cannot tax federal institutions. This case reinforced the supremacy of federal law over state law. It also strengthened the concept of implied powers under the Necessary and Proper clause.",
+        },
+        {
+          description:
+            "In this case, the Court ruled that under Article I's Commerce Clause, Congress has the power to regulate any aspect of commerce that crosses state lines.",
+          answer: "Gibbons v. Ogden 1824",
+          fullDescription:
+            "An 1824 case regarding the regulation of steamboat navigation in New York. The Court ruled that under Article I's Commerce Clause, Congress has the power to regulate any aspect of commerce that crosses state lines. Since Gibbons, the Commerce Clause has provided the basis for sweeping congressional power over a multitude of national issues.",
+        },
+        {
+          description:
+            "This series of cases defined the legal status of Native American tribes as 'domestic dependent nations' within the United States.",
+          answer: "The Marshall Trilogy 1823-1832",
+          fullDescription:
+            "A series of landmark Supreme Court cases that defined the legal status of Native American tribes within the United States. The Court, under Chief Justice John Marshall, established the principle of tribal sovereignty while also characterizing tribes as 'domestic dependent nations.' President Andrew Jackson's defiance of Marshall, contributed to the forced removal of tribes during the Trail of Tears.",
+        },
+        {
+          description:
+            "This case ruled that African Americans, whether enslaved or free, could not be U.S. citizens and declared the Missouri Compromise unconstitutional.",
+          answer: "Dred Scott v. Sandford 1857",
+          fullDescription:
+            "Dred Scott was a slave who attempted to sue for his freedom. The Court (7-2) ruled that African Americans, whether enslaved or free, could not be U.S. citizens. It also declared the Missouri Compromise unconstitutional, ruling that slavery could not be restricted by acts of Congress out West.",
+        },
+        {
+          description:
+            "In this case, Chief Justice Taney challenged President Lincoln's suspension of habeas corpus during the Civil War.",
+          answer: "Ex parte Merryman 1861",
+          fullDescription:
+            "While not a Supreme Court case, this decision by Chief Justice Roger Taney, sitting as a federal circuit judge, challenged President Abraham Lincoln's suspension of habeas corpus during the Civil War. Taney ruled that the president did not have the authority to suspend the writ without congressional approval, asserting constitutional protections even in war. Lincoln ignored the ruling.",
+        },
+        {
+          description:
+            "This case upheld the constitutionality of segregation under the 'separate but equal' doctrine.",
+          answer: "Plessy v. Ferguson 1896",
+          fullDescription:
+            "Homer Plessy, a man of mixed race, deliberately challenged Louisiana's segregation laws by refusing to leave a whites-only train car. This 7-1 decision ruled against Plessy and upheld the constitutionality of segregation under the 'separate but equal' doctrine, allowing states to maintain racially segregated public facilities.",
+        },
+        {
+          description:
+            "These cases ruled that full constitutional rights do not automatically apply to U.S. territories acquired after the Spanish-American War.",
+          answer: "Insular Cases 1901",
+          fullDescription:
+            "A series of decisions regarding U.S. territories acquired after the Spanish-American War. The Court ruled that full constitutional rights do not automatically apply to territories acquired by the U.S., such as Puerto Rico and the Philippines. These decisions shaped U.S. imperial policy and its relationship with territories.",
+        },
+        {
+          description:
+            "This case struck down a New York law that limited bakers to a 10-hour workday, arguing that it violated 'liberty of contract'.",
+          answer: "Lochner v. New York 1905",
+          fullDescription:
+            "The Court ruled 5–4 to strike down a New York law that limited bakers to a 10-hour workday. The court argued that the law violated 'liberty of contract'. In other words, individuals have the freedom to negotiate and enter into agreements with employers without interference from the government.",
+        },
+        {
+          description:
+            "These cases defined whiteness as a requirement for U.S. citizenship, ruling against Japanese and Indian immigrants.",
+          answer: "Ozawa v. United States, United States v. Thind 1922-1923",
+          fullDescription:
+            "Unanimous rulings that defined whiteness as a requirement for U.S. citizenship under the Naturalization Act of 1790. The Court ruled that Japanese immigrants were not white in Ozawa and rejected an Indian immigrant's claim to whiteness in Thind, emphasizing 'common understanding' over scientific classifications.",
+        },
+        {
+          description:
+            "This case upheld the internment of Japanese Americans during World War II.",
+          answer: "Korematsu v. United States 1944",
+          fullDescription:
+            "A 6–3 ruling issued in 1944 in which the Court held that the need to protect against espionage outweighed the individual rights of Americans of Japanese descent. This decision upheld the internment of Japanese Americans during World War II, despite widespread violations of civil liberties.",
+        },
+        {
+          description:
+            "This unanimous ruling overturned Plessy v. Ferguson, concluding that 'separate educational facilities are inherently unequal.'",
+          answer: "Brown v. Board of Education 1954",
+          fullDescription:
+            "A unanimous ruling issued in 1954. It overturned Plessy v. Ferguson, which had upheld state segregation laws for public facilities under the 'separate but equal' doctrine. The Brown v. Board decision concluded that 'separate educational facilities are inherently unequal.'",
+        },
+        {
+          description:
+            "This case struck down a Connecticut law banning birth control, citing a right to marital privacy derived from the 'penumbras' of the Bill of Rights.",
+          answer: "Griswold v. Connecticut 1965",
+          fullDescription:
+            "The Court 7-2 struck down a Connecticut law banning birth control, citing a right to marital privacy. This right, derived from the 'penumbras' of the Bill of Rights. The 'penumbras' refer to implied rights for people that are not explicitly stated in the Constitution but are inferred from its broader guarantees.",
+        },
+        {
+          description:
+            "This case struck down Virginia's anti-miscegenation statute, which outlawed interracial marriage.",
+          answer: "Loving v. Virginia 1967",
+          fullDescription:
+            "Decided in 1967 with a unanimous ruling, the Supreme Court held that Virginia's anti-miscegenation statute, which outlawed interracial marriage, violated both the Due Process Clause and the Equal Protection Clause of the 14th Amendment.",
+        },
+        {
+          description:
+            "In this 'Pentagon Papers Case,' the Court ruled against the Nixon administration's attempt to prevent publication of classified Vietnam War materials.",
+          answer: "New York Times v. United States 1971",
+          fullDescription:
+            "Commonly referred to as the 'Pentagon Papers Case,' this decision was a landmark in freedom of the press. The Supreme Court ruled 6–3 that the Nixon administration's attempt to prevent the publication of classified materials related to U.S. involvement in Vietnam violated the First Amendment.",
+        },
+        {
+          description:
+            "This case ruled that executive privilege cannot be used to withhold evidence in a criminal trial during the Watergate scandal.",
+          answer: "United States v. Nixon 1974",
+          fullDescription:
+            "An 8–0 ruling against President Richard Nixon. Nixon was attempting to use executive privilege to withhold evidence during the Watergate scandal. The Court held that no person is above the law and that executive privilege cannot be used to withhold evidence that is demonstrably relevant in a criminal trial.",
+        },
+        {
+          description:
+            "This case halted the Florida recount in the 2000 presidential election, effectively declaring George W. Bush the winner.",
+          answer: "Bush v. Gore 2000",
+          fullDescription:
+            "The Court 5-4 halted the Florida recount in the 2000 presidential election, citing Equal Protection Clause concerns and the lack of time to have a recount before certification. The five conservative justices effectively declared George W. Bush the winner, highlighting the judiciary's influence on political matters.",
+        },
+        {
+          description:
+            "This case ruled that corporate and union expenditures on political campaigns are protected as free speech under the First Amendment.",
+          answer: "Citizens United v. FEC 2010",
+          fullDescription:
+            "The Court 5-4 ruled that corporate and union expenditures on political campaigns are protected as free speech under the First Amendment. This decision allowed unlimited election spending by organizations, leading to the rise of super PACs.",
+        },
+        {
+          description:
+            "This case established that the Due Process and Equal Protection Clauses guarantee the right to same-sex marriage nationwide.",
+          answer: "Obergefell v. Hodges 2015",
+          fullDescription:
+            "Using the concept of 'penumbras' and the right to privacy, the Court ruled 5-4 that the Due Process and Equal Protection Clauses of the 14th Amendment guarantee the right to same-sex marriage. States must recognize and license these marriages, ensuring marriage equality nationwide.",
+        },
+        {
+          description:
+            "This decision overturned Roe v. Wade, ruling that procuring an abortion is not a fundamental constitutional right.",
+          answer: "Dobbs v. Jackson 2022",
+          fullDescription:
+            "A 6–3 decision issued in 2022. The majority ruled that 'procuring an abortion is not a fundamental constitutional right because such a right has no basis in the Constitution's text or in our Nation's history.' This decision overturned Roe v. Wade (1973) and returned the power to regulate abortion to the states.",
+        },
+      ];
+
+      let currentQuestionIndex = 0;
+      let attempts = 0;
+      let shuffledCases = [...cases];
+      let waitingForNext = false;
+      let startTime = performance.now();
+      let animationFrameId;
+
+      function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+      }
+
+      function displayQuestion() {
+        if (currentQuestionIndex >= shuffledCases.length) {
+          startTime = performance.now();
+          shuffledCases = shuffleArray([...cases]);
+          currentQuestionIndex = 0;
+        }
+
+        const question = shuffledCases[currentQuestionIndex];
+        document.getElementById("question-container").innerHTML = `
+                <h2>
+                    Question ${currentQuestionIndex + 1}/${shuffledCases.length}
+                    <span class="timer">0:00</span>
+                </h2>
+                <p>${question.description}</p>`;
+
+        // Reset and start timer
+        updateTimer();
+        document.getElementById("answer-container").innerHTML = "";
+        document.getElementById("full-description").innerHTML = "";
+        document.getElementById("attempts").innerHTML = "";
+        document.getElementById("answer-input").value = "";
+        attempts = 0;
+        waitingForNext = false;
+      }
+
+      function checkAnswer() {
+        if (waitingForNext) {
+          return;
+        }
+
+        const userAnswer = document
+          .getElementById("answer-input")
+          .value.trim()
+          .toLowerCase();
+        const correctAnswer = shuffledCases[currentQuestionIndex].answer.toLowerCase();
+
+        if (userAnswer === correctAnswer) {
+          showResult(true);
+        } else {
+          attempts++;
+          if (attempts < 3) {
+            document.getElementById("attempts").innerHTML = `Incorrect! You have ${
+              3 - attempts
+            } attempts remaining.`;
+          } else {
+            showResult(false);
+          }
+        }
+      }
+
+      function skipQuestion() {
+        if (!waitingForNext) {
+          showResult(false);
+        }
+      }
+
+      function showResult(isCorrect) {
+        waitingForNext = true;
+        const question = shuffledCases[currentQuestionIndex];
+        const resultClass = isCorrect ? "correct" : "incorrect";
+        document.getElementById(
+          "answer-container"
+        ).innerHTML = `<p class="${resultClass}">Answer: ${question.answer}</p>`;
+        document.getElementById(
+          "full-description"
+        ).innerHTML = `<p><strong>Full Description:</strong> ${question.fullDescription}</p>`;
+        document.getElementById("attempts").innerHTML =
+          "Press Enter to continue to the next question.";
+
+        document.addEventListener("keypress", nextQuestionHandler);
+      }
+
+      const updateTimer = () => {
+        const elapsed = Math.floor((performance.now() - startTime) / 1000);
+        const minutes = Math.floor(elapsed / 60);
+        const seconds = elapsed % 60;
+        const timerDisplay = `${minutes}:${seconds.toString().padStart(2, "0")}`;
+        const timerElement = document.querySelector(".timer");
+        if (timerElement) {
+          timerElement.textContent = timerDisplay;
+        }
+        animationFrameId = requestAnimationFrame(updateTimer);
+      };
+
+      function nextQuestionHandler(e) {
+        if (e.key === "Enter" && waitingForNext) {
+          document.removeEventListener("keypress", nextQuestionHandler);
+          cancelAnimationFrame(animationFrameId);
+          currentQuestionIndex++;
+          displayQuestion();
+        }
+      }
+
+      document.getElementById("answer-input").addEventListener("keypress", function (e) {
+        if (e.key === "Enter" && !waitingForNext) {
+          checkAnswer();
+        }
+      });
+
+      // Initialize
+      shuffledCases = shuffleArray([...cases]);
+      startTime = performance.now();
+      displayQuestion();
+    </script>
+  </body>
+</html>
